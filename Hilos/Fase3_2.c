@@ -1,0 +1,112 @@
+#include<stdlib.h>
+#include<stdio.h>
+#include<math.h>
+#include<pthread.h>
+#include<unistd.h>
+#include<sys/sem.h>
+#include<sys/types.h>
+#include<sys/ipc.h>
+
+#define RANGO 101
+#define n_valores 10
+#define pi 3.1415
+#define MAX_THREADS 10
+
+double matriz[RANGO][n_valores];
+double x[RANGO];
+int n[n_valores];
+
+void mostrarMatriz(double m[RANGO][n_valores]);
+void guardarComoCSV(double arreglo[], int longitud, const char* nombreArchivo);
+
+void *termino_variable(void *argumentoN){
+    int *n_valor = (int *) argumentoN;
+    printf("Hilo con n=%d\n", *n_valor);   
+    
+    double value = (double) *n_valor; 
+
+    for(int i=0; i<RANGO; i++){
+        matriz[i][*n_valor-1] = (2 / value )*((pow((-1),value))*(sin( value * x[i] )));
+    }
+    pthread_exit(NULL);
+}
+
+int main(){
+	// Vector n
+	
+	for(int i = 0; i<n_valores; i++){
+		n[i] = i+1;
+	}
+	
+	//Vector x
+    double aux = -10;
+	for(int i=0; i<RANGO; i++){
+		x[i] = aux;
+		aux += 0.2;
+	}
+	
+	// Declaración de hilos
+    pthread_t thread_id[MAX_THREADS];
+    
+    // Creación de hilos 
+    for(int i=0; i<n_valores; i++){
+        pthread_create(&thread_id[i], NULL,termino_variable, &n[i]);
+    }
+
+    // Método de espera para los hilos
+    for(int i=0; i<n_valores; i++){
+        pthread_join(thread_id[i], NULL);
+    }  
+    
+    // Mostramos la matriz resultante
+    mostrarMatriz(matriz);
+    
+    //  Vector "y"
+    double y[RANGO];
+
+    for(int i=0; i<RANGO; i++){
+        y[i] = 0;
+    }
+
+    for(int i=0; i<RANGO; i++){
+        for(int j=0; j<n_valores; j++){
+            y[i] += matriz[i][j];
+        }
+    }
+
+    int longitud = sizeof(y) / sizeof(y[0]);
+    const char* nombreArchivo = "y2.csv";
+    guardarComoCSV(y, longitud, nombreArchivo);
+
+    return 0;
+}
+
+void mostrarMatriz(double m[RANGO][n_valores]){
+	for(int i=0; i<RANGO; i++){
+        for(int j=0; j<n_valores; j++){
+            printf("%f ", m[i][j]);
+        }
+        printf("\n");
+    }   	
+}
+
+void guardarComoCSV(double arreglo[], int longitud, const char* nombreArchivo) {
+    FILE* archivo = fopen(nombreArchivo, "w");
+    
+    if (archivo == NULL) {
+        printf("No se pudo abrir el archivo.\n");
+        return;
+    }
+    
+    for (int i = 0; i < longitud; i++) {
+        fprintf(archivo, "%f", arreglo[i]);
+        
+        // Agrega una coma después de cada elemento, excepto el último
+        if (i < longitud - 1) {
+            fprintf(archivo, "\n");
+        }
+    }
+    
+    fclose(archivo);
+    printf("El arreglo se ha guardado como CSV en el archivo: %s\n", nombreArchivo);
+}
