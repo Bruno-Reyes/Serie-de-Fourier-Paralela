@@ -1,11 +1,7 @@
-#include<stdlib.h>
-#include<stdio.h>
-#include<math.h>
-#include<pthread.h>
-#include<unistd.h>
-#include<sys/sem.h>
-#include<sys/types.h>
-#include<sys/ipc.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <pthread.h>
 
 #define RANGO 101
 #define n_valores 10
@@ -15,9 +11,6 @@
 double matriz[RANGO][n_valores];
 double x[RANGO];
 int n[n_valores];
-
-void mostrarMatriz(double m[RANGO][n_valores]);
-void guardarComoCSV(double arreglo[], int longitud, const char* nombreArchivo);
 
 void *termino_variable(void *argumentoN){
     int *n_valor = (int *) argumentoN;
@@ -31,13 +24,14 @@ void *termino_variable(void *argumentoN){
     pthread_exit(NULL);
 }
 
+void mostrarMatriz(double m[RANGO][n_valores]);
+void guardarComoCSV(double arreglo[], int longitud, const char* nombreArchivo);
+
 int main(){
 	// Vector n
-	
 	for(int i = 0; i<n_valores; i++){
 		n[i] = i+1;
 	}
-	
 	//Vector x
     double aux = -10;
 	for(int i=0; i<RANGO; i++){
@@ -47,27 +41,23 @@ int main(){
 	
 	// Declaración de hilos
     pthread_t thread_id[MAX_THREADS];
-    
     // Creación de hilos 
     for(int i=0; i<n_valores; i++){
         pthread_create(&thread_id[i], NULL,termino_variable, &n[i]);
     }
-
     // Método de espera para los hilos
     for(int i=0; i<n_valores; i++){
         pthread_join(thread_id[i], NULL);
     }  
     
     // Mostramos la matriz resultante
-    mostrarMatriz(matriz);
+    //mostrarMatriz(matriz);
     
     //  Vector "y"
     double y[RANGO];
-
     for(int i=0; i<RANGO; i++){
         y[i] = 0;
     }
-
     for(int i=0; i<RANGO; i++){
         for(int j=0; j<n_valores; j++){
             y[i] += matriz[i][j];

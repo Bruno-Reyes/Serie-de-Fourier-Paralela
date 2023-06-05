@@ -2,23 +2,15 @@
 #include <stdlib.h>
 #include <math.h>
 #include <pthread.h>
-#include <unistd.h>
-#include <sys/sem.h>
-#include <sys/types.h>
-#include <sys/ipc.h>
 
 #define RANGO 101
-#define n_valores 12
+#define n_valores 10
 #define pi 3.1415
 #define MAX_THREADS 10
 
 double matriz[RANGO][n_valores];
 double x[RANGO];
 int n[n_valores];
-
-double constante();
-void mostrarMatriz(double m[RANGO][n_valores]);
-void guardarComoCSV(double arreglo[], int longitud, const char* nombreArchivo);
 
 void *termino_variable(void *argumentoN){
     int *n_valor = (int *) argumentoN;
@@ -29,43 +21,45 @@ void *termino_variable(void *argumentoN){
     pthread_exit(NULL);
 }
 
-int main(){
+double constante(){
+    return pi/2;
+}
 
+void mostrarMatriz(double m[RANGO][n_valores]);
+void guardarComoCSV(double arreglo[], int longitud, const char* nombreArchivo);
+
+int main(){
+    // Vector n
     for(int i = 0; i<n_valores; i++){
         n[i] = i+1;
     }
     // Creamos el vector de valores de x
     double aux = -10.0;
-    double incremento = 0.2;
     for(int i=0; i<RANGO; i++){
         x[i] = aux;
-        aux += incremento;
+        aux += 0.2;
     }
-
     // Calcular el término constante
     double termino_constante = constante();
 
     // Declaracion de hilos
     pthread_t thread_id[MAX_THREADS];
-    
     // Creacion de hilos 
     for(int i=0; i<n_valores; i++){
         pthread_create(&thread_id[i], NULL,termino_variable, &n[i]);
     }
-
     // Método de espera para los hilos
     for(int i=0; i<n_valores; i++){
         pthread_join(thread_id[i], NULL);
     }
 
+
     // Creamos el vector de salida   
     double y[RANGO];
-
     // Inicializamos el vector de salida con 0's
     for(int i=0; i<RANGO; i++){
         y[i] = 0;
     }  
-
     // Sumamos todas las filas y almacenamos el resultado en la lista "y"
     for(int i=0; i<RANGO; i++){
         for(int j=0; j<n_valores; j++){
@@ -78,7 +72,7 @@ int main(){
     printf("\n");
 
     // Mostramos la matriz resultante
-    mostrarMatriz(matriz);
+    //mostrarMatriz(matriz);
 
     // Guardamos los datos en un archivo para su visualización 
     int longitud = sizeof(y) / sizeof(y[0]);
@@ -86,10 +80,6 @@ int main(){
     guardarComoCSV(y, longitud, nombreArchivo);
 
     return 0;
-}
-
-double constante(){
-    return pi/2;
 }
 
 void mostrarMatriz(double m[RANGO][n_valores]){

@@ -1,11 +1,7 @@
-#include<stdlib.h>
-#include<stdio.h>
-#include<math.h>
-#include<pthread.h>
-#include<unistd.h>
-#include<sys/sem.h>
-#include<sys/types.h>
-#include<sys/ipc.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <pthread.h>
 
 #define RANGO 101
 #define n_valores 10
@@ -17,10 +13,6 @@ double x[RANGO];
 double constante[RANGO];
 int n[n_valores];
 
-
-void mostrarMatriz(double m[RANGO][n_valores]);
-void guardarComoCSV(double arreglo[], int longitud, const char* nombreArchivo);
-
 void *termino_variable(void *argumentoN){
     int *n_valor = (int *) argumentoN;
     printf("Hilo con n= %d\n", *n_valor);   
@@ -30,7 +22,6 @@ void *termino_variable(void *argumentoN){
     }
     pthread_exit(NULL);
 }
-
 void *termino_constante(){
     printf("Hilo para termino constante inicializado \n");
     double term_constante = 0;
@@ -39,19 +30,20 @@ void *termino_constante(){
     }
 }
 
+void mostrarMatriz(double m[RANGO][n_valores]);
+void guardarComoCSV(double arreglo[], int longitud, const char* nombreArchivo);
+
 int main(){
 	// Vector n
 	for(int i=0; i<n_valores; i++){
         n[i] = i+2;
     }
-	
 	// Vector x
     double aux = -10;
 	for(int i=0; i<RANGO; i++){
 		x[i] = aux;
 		aux += 0.2;
 	}
-
     // Vector constante
 	for(int i=0; i<RANGO+1; i++){
 		constante[i] = 0;
@@ -60,13 +52,11 @@ int main(){
 	// Declaración de hilos
     pthread_t thread_id[MAX_THREADS];
     pthread_t thread_cte;
-    
     // Creación de hilos 
     for(int i=0; i<n_valores; i++){
         pthread_create(&thread_id[i], NULL,termino_variable, &n[i]);
     }
     pthread_create(&thread_cte, NULL, termino_constante, NULL);
-
     // Método de espera para los hilos
     for(int i=0; i<n_valores; i++){
         pthread_join(thread_id[i], NULL);
@@ -74,15 +64,13 @@ int main(){
     pthread_join(thread_cte, NULL);
     
     // Mostramos la matriz resultante
-    mostrarMatriz(matriz);
+    //mostrarMatriz(matriz);
     
     //  Vector y
     double y[RANGO];
-
     for(int i=0; i<RANGO; i++){
         y[i] = 0;
     }
-
     for(int i=0; i<RANGO; i++){
         for(int j=0; j<n_valores; j++){
             y[i] += matriz[i][j];
